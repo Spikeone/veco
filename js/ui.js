@@ -63,6 +63,7 @@ export function createUi(callbacks) {
   function renderSelection() {
     els.modeButtons.forEach((b) =>
       b.classList.toggle('selected', b.dataset.mode === selection.mode));
+    els.shuffleToggle.textContent = `${selection.shuffle ? '✅' : '❌'} Shuffle`;
     els.shuffleToggle.classList.toggle('selected', selection.shuffle);
     els.shuffleToggle.setAttribute('aria-pressed', String(selection.shuffle));
     callbacks.onSelectionChange?.(selection);
@@ -142,8 +143,9 @@ export function createUi(callbacks) {
     return h > 0 ? `${h}h ${m}m` : `${m}m ${String(s).padStart(2, '0')}s`;
   }
 
-  function updateStartScreen(stats, best, labels) {
+  function updateStartScreen(stats, best, labels, scopeText) {
     els.startBest.textContent = `${labels.best}: ${best.points} · ${labels.level} ${best.level}`;
+    $('stats-scope').textContent = scopeText || '';
     const rounds = stats.totalRight + stats.totalWrong + stats.totalTimeouts;
     const answered = stats.totalRight + stats.totalWrong;
     const accuracy = answered > 0 ? `${Math.round((stats.totalRight / answered) * 100)}%` : '–';

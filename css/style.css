@@ -266,6 +266,12 @@ header {
 #btn-play img { width: clamp(110px, 30vw, 150px); }
 #btn-play:active { transform: scale(0.95); }
 
+#stats-scope {
+  font-size: 0.75rem;
+  opacity: 0.5;
+  margin-top: 3px;
+}
+
 #stats-block {
   max-width: 260px;
   margin: 10px auto 0;

@@ -33,5 +33,18 @@ export function saveBest(mode, shuffle, points, maxLevel) {
 }
 
 const EMPTY_STATS = { totalRight: 0, totalWrong: 0, totalTimeouts: 0, totalPlayMs: 0 };
-export const loadStats = () => ({ ...EMPTY_STATS, ...get('stats', {}) });
-export const saveStats = (s) => set('stats', s);
+const statsKey = (mode, shuffle) => `stats.${mode}.${shuffle ? 'shuffle' : 'normal'}`;
+
+export const loadStatsFor = (mode, shuffle) =>
+  ({ ...EMPTY_STATS, ...get(statsKey(mode, shuffle), {}) });
+export const saveStatsFor = (mode, shuffle, s) => set(statsKey(mode, shuffle), s);
+
+// One-time migration: fold the pre-per-mode global stats into endless/normal.
+(() => {
+  const legacy = get('stats', null);
+  if (!legacy) return;
+  const target = loadStatsFor('endless', false);
+  for (const k of Object.keys(EMPTY_STATS)) target[k] += legacy[k] || 0;
+  saveStatsFor('endless', false, target);
+  try { localStorage.removeItem(PREFIX + 'stats'); } catch { /* ignore */ }
+})();

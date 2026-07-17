@@ -8,27 +8,40 @@ import { LABELS, FOOD_MIN, FOOD_MAX, foodSrc } from './config.js';
 let game = null;
 let best = { points: 0, level: 1 };
 let startBestPoints = 0; // best at session start, for the "New best!" badge
-let stats = storage.loadStats();
+let stats = null; // stats bucket of the ACTIVE game's mode+shuffle combo
 let lastFrame = 0;
 let pauseShownAt = 0;
 let ui = null;
 
+function scopeLabel(mode, shuffle) {
+  return (mode === 'ta' ? LABELS.timeAttack : LABELS.endless)
+    + (shuffle ? ` · ${LABELS.shuffle}` : '');
+}
+
 function refreshStartScreen() {
   if (!ui) return;
-  best = storage.loadBest(ui.selection.mode, ui.selection.shuffle);
-  ui.updateStartScreen(stats, best, LABELS);
+  const sel = ui.selection;
+  best = storage.loadBest(sel.mode, sel.shuffle);
+  ui.updateStartScreen(
+    storage.loadStatsFor(sel.mode, sel.shuffle), best, LABELS,
+    scopeLabel(sel.mode, sel.shuffle));
+}
+
+function saveActiveStats() {
+  if (game && stats) storage.saveStatsFor(game.state.mode, game.state.shuffle, stats);
 }
 
 function persistProgress() {
   const st = game.state;
   best = storage.saveBest(st.mode, st.shuffle, st.points, st.maxLevel).best;
-  storage.saveStats(stats);
+  saveActiveStats();
 }
 
 function onPlay(mode, shuffle) {
   audio.unlock();
   startBestPoints = storage.loadBest(mode, shuffle).points;
   best = storage.loadBest(mode, shuffle);
+  stats = storage.loadStatsFor(mode, shuffle);
   game = createGame({ mode, shuffle });
   game.start();
   ui.hideOverlays();
@@ -53,7 +66,7 @@ function onPauseToggle() {
   if (!game) return;
   if (game.state.phase === 'running') {
     game.pause();
-    storage.saveStats(stats);
+    saveActiveStats();
     pauseShownAt = performance.now();
     ui.showOverlay('pause');
   } else if (game.state.phase === 'paused') {
@@ -155,10 +168,10 @@ document.addEventListener('visibilitychange', () => {
       pauseShownAt = performance.now();
       ui.showOverlay('pause');
     }
-    storage.saveStats(stats);
+    saveActiveStats();
   }
 });
-window.addEventListener('pagehide', () => storage.saveStats(stats));
+window.addEventListener('pagehide', () => saveActiveStats());
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -170,7 +183,8 @@ if ('serviceWorker' in navigator) {
 if (location.hash === '#debug') {
   window.veco = {
     get game() { return game; },
+    get stats() { return stats; },
     set level(n) { if (game) { game.state.level = n; game.startRound(); ui.renderRound(game.state); } },
-    createGame, multisetEqual, storage, stats,
+    createGame, multisetEqual, storage,
   };
 }
