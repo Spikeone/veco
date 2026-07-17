@@ -20,7 +20,7 @@ Screen**. It then runs fullscreen and works offline.
 Best scores are kept per mode, lifetime statistics across all of them
 (stored locally on the device).
 
-Keyboard on desktop: **A** = same, **D** = different, **P** = pause.
+Keyboard on desktop: **A** = different (left, like ✗), **D** = same (right, like ✓), **P** = pause.
 
 ## Development
 

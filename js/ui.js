@@ -183,11 +183,14 @@ export function createUi(callbacks) {
   $('btn-credits').addEventListener('click', () => showOverlay('credits'));
   $('btn-credits-close').addEventListener('click', () => showOverlay('start'));
 
+  // Spatially aligned with the buttons/swipe (left = different, right = same).
+  // The 2019 original had A=same — but its YES button sat on the LEFT, so this
+  // keeps the original's left/right logic, not its letters.
   window.addEventListener('keydown', (e) => {
     if (e.repeat) return;
     const k = e.key.toLowerCase();
-    if (k === 'a') onAnswer(true);
-    else if (k === 'd') onAnswer(false);
+    if (k === 'a') onAnswer(false);
+    else if (k === 'd') onAnswer(true);
     else if (k === 'p') onPauseToggle();
   });
 
