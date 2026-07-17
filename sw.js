@@ -1,5 +1,5 @@
 // Precache-everything service worker. Release ritual: bump CACHE, commit, push.
-const CACHE = 'veco-v1';
+const CACHE = 'veco-v2';
 
 const UI_IMAGES = [
   'sound-on', 'sound-off', 'basket', 'cart', 'play-big',

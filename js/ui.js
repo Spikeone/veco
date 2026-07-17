@@ -169,8 +169,10 @@ export function createUi(callbacks) {
   // ----- input -----
   $('btn-yes').addEventListener('pointerdown', (e) => { e.preventDefault(); onAnswer(true); });
   $('btn-no').addEventListener('pointerdown', (e) => { e.preventDefault(); onAnswer(false); });
-  $('btn-pause').addEventListener('pointerdown', (e) => { e.preventDefault(); onPauseToggle(); });
-  $('btn-mute').addEventListener('pointerdown', (e) => { e.preventDefault(); onMuteToggle(); });
+  // click, not pointerdown: acting on pointerdown swaps the UI under the finger and the
+  // tap's synthesized click then lands on whatever replaced it (iOS ghost click)
+  $('btn-pause').addEventListener('click', () => onPauseToggle());
+  $('btn-mute').addEventListener('click', () => onMuteToggle());
 
   $('btn-play').addEventListener('click', () => onPlay(selection.mode, selection.shuffle));
   els.overlays.pause.addEventListener('click', () => onResume());

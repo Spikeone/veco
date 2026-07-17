@@ -10,6 +10,7 @@ let best = { points: 0, level: 1 };
 let startBestPoints = 0; // best at session start, for the "New best!" badge
 let stats = storage.loadStats();
 let lastFrame = 0;
+let pauseShownAt = 0;
 let ui = null;
 
 function refreshStartScreen() {
@@ -53,6 +54,7 @@ function onPauseToggle() {
   if (game.state.phase === 'running') {
     game.pause();
     storage.saveStats(stats);
+    pauseShownAt = performance.now();
     ui.showOverlay('pause');
   } else if (game.state.phase === 'paused') {
     onResume();
@@ -61,6 +63,8 @@ function onPauseToggle() {
 
 function onResume() {
   if (!game || game.state.phase !== 'paused') return;
+  // swallow the ghost click of the very tap that opened the pause overlay
+  if (performance.now() - pauseShownAt < 350) return;
   audio.unlock(); // re-resumes the AudioContext after backgrounding
   game.resume();
   ui.hideOverlays();
@@ -148,6 +152,7 @@ document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
     if (game && game.state.phase === 'running') {
       game.pause();
+      pauseShownAt = performance.now();
       ui.showOverlay('pause');
     }
     storage.saveStats(stats);
