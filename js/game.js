@@ -1,0 +1,114 @@
+// Pure game logic — no DOM, no timers. The clock is advanced from outside via advance(elapsedMs).
+import {
+  ROUND_BASE_MS, MS_PER_LEVEL, MAX_ITEMS,
+  FOOD_MIN, FOOD_MAX, DIFF_PROBABILITY, TIME_ATTACK_MS,
+} from './config.js';
+
+const FOOD_COUNT = FOOD_MAX - FOOD_MIN + 1;
+
+export function multisetEqual(a, b) {
+  if (a.length !== b.length) return false;
+  const sa = [...a].sort((x, y) => x - y);
+  const sb = [...b].sort((x, y) => x - y);
+  return sa.every((v, i) => v === sb[i]);
+}
+
+export function createGame({ mode = 'endless', shuffle = false, rng = Math.random } = {}) {
+  const state = {
+    mode, shuffle,
+    phase: 'idle', // idle | running | paused | over
+    level: 1, maxLevel: 1,
+    right: 0, wrong: 0, timeouts: 0,
+    points: 0,
+    required: [], actual: [], isSame: true,
+    roundBudgetMs: ROUND_BASE_MS,
+    roundRemainingMs: ROUND_BASE_MS,
+    globalRemainingMs: mode === 'ta' ? TIME_ATTACK_MS : Infinity,
+  };
+
+  const randomFood = () => FOOD_MIN + Math.floor(rng() * FOOD_COUNT);
+
+  function startRound() {
+    const count = Math.min(state.level, MAX_ITEMS);
+    const required = Array.from({ length: count }, randomFood);
+    const actual = required.slice();
+
+    if (state.shuffle) {
+      for (let i = actual.length - 1; i > 0; i--) {
+        const j = Math.floor(rng() * (i + 1));
+        [actual[i], actual[j]] = [actual[j], actual[i]];
+      }
+    }
+
+    state.isSame = true;
+    if (rng() < DIFF_PROBABILITY) {
+      // Deviation from the original's `id/2 + 1` (which maps ids 1-2 to themselves ->
+      // unwinnable rounds, and never mutated the last slot): pick any slot uniformly
+      // and replace with a uniformly random *different* id.
+      const slot = Math.floor(rng() * count);
+      const offset = 1 + Math.floor(rng() * (FOOD_COUNT - 1));
+      actual[slot] = FOOD_MIN + ((actual[slot] - FOOD_MIN + offset) % FOOD_COUNT);
+      state.isSame = false;
+    }
+
+    state.required = required;
+    state.actual = actual;
+    state.roundBudgetMs = ROUND_BASE_MS - state.level * MS_PER_LEVEL;
+    state.roundRemainingMs = state.roundBudgetMs;
+  }
+
+  function start() {
+    state.phase = 'running';
+    state.level = 1;
+    state.maxLevel = 1;
+    state.right = 0;
+    state.wrong = 0;
+    state.timeouts = 0;
+    state.points = 0;
+    state.globalRemainingMs = state.mode === 'ta' ? TIME_ATTACK_MS : Infinity;
+    startRound();
+  }
+
+  function answer(saysSame) {
+    if (state.phase !== 'running') return null;
+    const correct = saysSame === state.isSame;
+    if (correct) {
+      state.right++;
+      state.level++;
+      state.maxLevel = Math.max(state.maxLevel, state.level);
+      state.points += Math.max(0, Math.round(state.roundRemainingMs));
+    } else {
+      state.wrong++;
+      state.level = Math.max(1, state.level - 1);
+    }
+    startRound();
+    return correct ? 'correct' : 'wrong';
+  }
+
+  // Advance both clocks by elapsedMs. Returns 'running' | 'timeout' | 'gameover' | null.
+  // At most one timeout per call: the caller drives frequently (rAF) and auto-pauses on hide.
+  function advance(elapsedMs) {
+    if (state.phase !== 'running') return null;
+    if (state.mode === 'ta') {
+      state.globalRemainingMs -= elapsedMs;
+      if (state.globalRemainingMs <= 0) {
+        state.globalRemainingMs = 0;
+        state.phase = 'over';
+        return 'gameover';
+      }
+    }
+    state.roundRemainingMs -= elapsedMs;
+    if (state.roundRemainingMs <= 0) {
+      state.timeouts++;
+      state.level = Math.max(1, state.level - 1);
+      startRound();
+      return 'timeout';
+    }
+    return 'running';
+  }
+
+  function pause() { if (state.phase === 'running') state.phase = 'paused'; }
+  function resume() { if (state.phase === 'paused') state.phase = 'running'; }
+
+  return { state, start, answer, advance, pause, resume, startRound };
+}

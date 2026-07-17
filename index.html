@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>VeCo</title>
+  <meta name="description" content="VeCo — VEgetable COmpare. Does the cart match the shopping list?">
+  <meta name="theme-color" content="#1c1c24">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="VeCo">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Food & UI icons by bqlqn, Freepik, xnimrodx, Kiranshastry, Roundicons (flaticon.com) -->
+</head>
+<body>
+  <div id="app">
+    <header>
+      <button class="icon-btn" id="btn-mute" aria-label="Toggle sound">
+        <img id="img-mute" src="assets/ui/sound-on.png" alt="" draggable="false">
+      </button>
+      <div id="hud-level">Level 1</div>
+      <button class="icon-btn" id="btn-pause" aria-label="Pause">
+        <img src="assets/ui/pause-small.png" alt="" draggable="false">
+      </button>
+    </header>
+
+    <div id="hud-stats">
+      <div class="stat"><span class="stat-label">Time</span><span class="stat-value" id="hud-time">–</span></div>
+      <div class="stat"><span class="stat-label">Right</span><span class="stat-value" id="hud-right">0</span></div>
+      <div class="stat"><span class="stat-label">Wrong</span><span class="stat-value" id="hud-wrong">0</span></div>
+      <div class="stat"><span class="stat-label">Points</span><span class="stat-value" id="hud-points">0</span></div>
+      <div class="stat"><span class="stat-label">Best</span><span class="stat-value" id="hud-best">0</span></div>
+    </div>
+
+    <div id="playfield">
+      <div class="panel">
+        <div class="grid" id="grid-required"></div>
+        <img class="panel-img" src="assets/ui/basket.png" alt="Shopping list" draggable="false">
+      </div>
+      <div class="panel">
+        <div class="grid" id="grid-actual"></div>
+        <img class="panel-img" src="assets/ui/cart.png" alt="Your cart" draggable="false">
+      </div>
+    </div>
+
+    <div id="round-bar"><div id="round-bar-fill"></div></div>
+
+    <div id="controls">
+      <button class="answer-btn" id="btn-no" aria-label="Different">
+        <img src="assets/ui/no.png" alt="" draggable="false">
+      </button>
+      <button class="answer-btn" id="btn-yes" aria-label="Same">
+        <img src="assets/ui/yes.png" alt="" draggable="false">
+      </button>
+    </div>
+
+    <!-- Start / mode select -->
+    <div class="overlay" id="overlay-start">
+      <div class="overlay-card">
+        <h1>VeCo</h1>
+        <p class="subtitle">VEgetable COmpare</p>
+        <p class="howto">
+          Does the cart match the list?<br>
+          same → swipe right or ✓<br>
+          different → swipe left or ✗
+        </p>
+        <div class="mode-row">
+          <button class="mode-btn selected" data-mode="endless">Endless</button>
+          <button class="mode-btn" data-mode="ta">Time Attack</button>
+        </div>
+        <button class="mode-btn shuffle-btn" id="toggle-shuffle" aria-pressed="false">Shuffle</button>
+        <p id="start-best">Best: 0 · Level 1</p>
+        <button id="btn-play" aria-label="Play">
+          <img src="assets/ui/play-big.png" alt="" draggable="false">
+        </button>
+        <h2>Statistics</h2>
+        <div id="stats-block"></div>
+        <button class="link-btn" id="btn-credits">Credits</button>
+      </div>
+    </div>
+
+    <!-- Pause -->
+    <div class="overlay hidden" id="overlay-pause">
+      <div class="overlay-card">
+        <h1>Paused</h1>
+        <img class="pause-icon" src="assets/ui/play-big.png" alt="" draggable="false">
+        <p class="subtitle">tap to resume</p>
+      </div>
+    </div>
+
+    <!-- Time attack end -->
+    <div class="overlay hidden" id="overlay-end">
+      <div class="overlay-card">
+        <h1>Time's up!</h1>
+        <p class="subtitle">Final score</p>
+        <p id="end-score">0</p>
+        <p id="end-new-best" class="hidden">New best!</p>
+        <p id="end-best">Best: 0</p>
+        <div class="mode-row">
+          <button class="mode-btn" id="btn-play-again">Play again</button>
+          <button class="mode-btn" id="btn-menu">Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Credits -->
+    <div class="overlay hidden" id="overlay-credits">
+      <div class="overlay-card">
+        <h1>Credits</h1>
+        <p class="credits-text">
+          Food &amp; UI icons by<br>
+          bqlqn · Freepik · xnimrodx<br>
+          Kiranshastry · Roundicons<br>
+          (flaticon.com)
+        </p>
+        <p class="credits-text">
+          Music: “Casual Theme Loop #3”<br>
+          from the original VeCo (2019)
+        </p>
+        <p class="credits-text">
+          Sound effects: synthesized
+        </p>
+        <p class="credits-text">
+          A web remake of the original<br>
+          VeCo for Windows (2019)
+        </p>
+        <button class="mode-btn" id="btn-credits-close">Back</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
