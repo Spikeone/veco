@@ -36,6 +36,18 @@ export function saveBest(mode, shuffle, points, maxLevel) {
   return { best, isNewPoints: points > prev.points };
 }
 
+const SLOT_COUNT = 5;
+export function loadSlots() {
+  const raw = get('slots', []);
+  return Array.from({ length: SLOT_COUNT }, (_, i) => raw[i] || null);
+}
+export function saveSlot(index, snap) {
+  const slots = loadSlots();
+  slots[index] = snap;
+  set('slots', slots);
+  return slots;
+}
+
 const EMPTY_STATS = { totalRight: 0, totalWrong: 0, totalTimeouts: 0, totalPlayMs: 0 };
 const statsKey = (mode, shuffle) => `stats.${mode}.${shuffle ? 'shuffle' : 'normal'}`;
 

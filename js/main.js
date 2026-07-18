@@ -113,6 +113,41 @@ function onMuteToggle() {
   ui.setMuteIcon(audio.isMuted());
 }
 
+// ----- savegame slots -----
+function onSaveRequest() {
+  if (!game || game.state.phase !== 'paused') return;
+  ui.showSlots('save', storage.loadSlots(), LABELS);
+}
+
+function onLoadRequest() {
+  ui.showSlots('load', storage.loadSlots(), LABELS);
+}
+
+function onSlotPicked(index, mode) {
+  if (mode === 'save') {
+    if (!game) return;
+    const slots = storage.saveSlot(index, { ...game.snapshot(), savedAt: Date.now() });
+    ui.refreshSlots(slots);
+    return;
+  }
+  const snap = storage.loadSlots()[index];
+  if (!snap) return;
+  audio.unlock();
+  startBestPoints = storage.loadBest(snap.mode, snap.shuffle).points;
+  best = storage.loadBest(snap.mode, snap.shuffle);
+  stats = storage.loadStatsFor(snap.mode, snap.shuffle);
+  game = createGame({ mode: snap.mode, shuffle: snap.shuffle });
+  game.loadState(snap);
+  ui.hideOverlays();
+  ui.renderRound(game.state);
+  ui.renderHud(game.state, best);
+  lastFrame = performance.now();
+}
+
+function onSlotsBack(mode) {
+  ui.showOverlay(mode === 'save' ? 'pause' : 'start');
+}
+
 // Clock step — wall-clock based, so it can be driven from both rAF (smooth display)
 // and a setInterval watchdog (keeps the game fair if rAF is throttled).
 function step(now) {
@@ -159,6 +194,7 @@ function preloadFoods() {
 ui = createUi({
   onPlay, onAnswer, onPauseToggle, onResume,
   onPlayAgain, onMenu, onMuteToggle,
+  onSaveRequest, onLoadRequest, onSlotPicked, onSlotsBack,
   onSelectionChange: refreshStartScreen,
   onVolumeChange: (kind, value) => audio.setVolume(kind, value),
   onVolumeCommit: (kind) => { if (kind === 'sfx') audio.playSfx('correct'); },

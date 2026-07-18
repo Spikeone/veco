@@ -81,6 +81,7 @@
         <button id="btn-play" aria-label="Play">
           <img src="assets/ui/play-big.png" alt="" draggable="false">
         </button>
+        <div><button class="mode-btn" id="btn-load">Load game</button></div>
         <h2>Volume</h2>
         <div class="volume-row"><span>Music</span><input type="range" data-vol="music" min="0" max="1" step="0.05" aria-label="Music volume"></div>
         <div class="volume-row"><span>Effects</span><input type="range" data-vol="sfx" min="0" max="1" step="0.05" aria-label="Effects volume"></div>
@@ -103,6 +104,7 @@
           <div class="volume-row"><span>Effects</span><input type="range" data-vol="sfx" min="0" max="1" step="0.05" aria-label="Effects volume"></div>
           <div class="mode-row">
             <button class="mode-btn" id="btn-pause-restart">Restart</button>
+            <button class="mode-btn" id="btn-save">Save</button>
             <button class="mode-btn" id="btn-pause-menu">Menu</button>
           </div>
         </div>
@@ -121,6 +123,15 @@
           <button class="mode-btn" id="btn-play-again">Play again</button>
           <button class="mode-btn" id="btn-menu">Menu</button>
         </div>
+      </div>
+    </div>
+
+    <!-- Savegame slots (save + load share this overlay) -->
+    <div class="overlay hidden" id="overlay-slots">
+      <div class="overlay-card">
+        <h1 id="slots-title">Save game</h1>
+        <div id="slots-list"></div>
+        <button class="mode-btn" id="btn-slots-back">Back</button>
       </div>
     </div>
 

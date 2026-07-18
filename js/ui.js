@@ -35,7 +35,10 @@ export function createUi(callbacks) {
       pause: $('overlay-pause'),
       end: $('overlay-end'),
       credits: $('overlay-credits'),
+      slots: $('overlay-slots'),
     },
+    slotsTitle: $('slots-title'),
+    slotsList: $('slots-list'),
     startBest: $('start-best'),
     statsBlock: $('stats-block'),
     endScore: $('end-score'),
@@ -166,6 +169,79 @@ export function createUi(callbacks) {
       .join('');
   }
 
+  // ----- savegame slots -----
+  let slotsMode = 'save';
+  let lastSlots = [];
+  let lastLabels = null;
+  let armedSlot = -1;
+  let armTimer = 0;
+
+  function renderSlots() {
+    els.slotsList.innerHTML = '';
+    lastSlots.forEach((snap, i) => {
+      const labels = lastLabels;
+      const btn = document.createElement('button');
+      btn.className = 'slot-btn';
+      const title = document.createElement('span');
+      title.className = 'slot-title';
+      const sub = document.createElement('span');
+      sub.className = 'slot-sub';
+      const date = document.createElement('span');
+      date.className = 'slot-date';
+      if (snap) {
+        const modeName = snap.mode === 'ta' ? labels.timeAttack
+          : snap.mode === 'lives' ? labels.lives : labels.endless;
+        title.textContent = `${labels.slot} ${i + 1} — ${modeName}${snap.shuffle ? ` · ${labels.shuffle}` : ''}`;
+        let info = `${snap.points} ${labels.points.toLowerCase()} · ${labels.level} ${snap.level}`;
+        if (snap.lives != null) info += ` · ❤ ${snap.lives}`;
+        if (snap.taRemainingMs != null) info += ` · ⏱ ${Math.ceil(snap.taRemainingMs / 1000)}s`;
+        sub.textContent = info;
+        date.textContent = new Date(snap.savedAt).toLocaleString([], {
+          day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit',
+        });
+      } else {
+        title.textContent = `${labels.slot} ${i + 1}`;
+        sub.textContent = labels.empty;
+        if (slotsMode === 'load') btn.disabled = true;
+      }
+      if (slotsMode === 'save' && armedSlot === i) {
+        btn.classList.add('armed');
+        title.textContent = labels.overwrite;
+      }
+      btn.addEventListener('click', () => {
+        if (slotsMode === 'save' && snap && armedSlot !== i) {
+          // occupied slot: first tap arms, second tap (within 2.5 s) overwrites
+          armedSlot = i;
+          clearTimeout(armTimer);
+          armTimer = setTimeout(() => { armedSlot = -1; renderSlots(); }, 2500);
+          renderSlots();
+          return;
+        }
+        clearTimeout(armTimer);
+        armedSlot = -1;
+        callbacks.onSlotPicked?.(i, slotsMode);
+      });
+      btn.append(title, sub, date);
+      els.slotsList.append(btn);
+    });
+  }
+
+  function showSlots(mode, slots, labels) {
+    slotsMode = mode;
+    lastSlots = slots;
+    lastLabels = labels;
+    armedSlot = -1;
+    els.slotsTitle.textContent = mode === 'save' ? labels.saveGame : labels.loadGame;
+    renderSlots();
+    showOverlay('slots');
+  }
+
+  function refreshSlots(slots) {
+    lastSlots = slots;
+    armedSlot = -1;
+    renderSlots();
+  }
+
   function showEndScreen(points, best, isNewBest, labels, title) {
     els.endTitle.textContent = title || labels.timesUp;
     els.endScore.textContent = points;
@@ -189,6 +265,9 @@ export function createUi(callbacks) {
   });
   $('btn-pause-menu').addEventListener('click', () => onMenu());
   $('btn-pause-restart').addEventListener('click', () => onPlayAgain());
+  $('btn-save').addEventListener('click', () => callbacks.onSaveRequest?.());
+  $('btn-load').addEventListener('click', () => callbacks.onLoadRequest?.());
+  $('btn-slots-back').addEventListener('click', () => callbacks.onSlotsBack?.(slotsMode));
   $('btn-play-again').addEventListener('click', () => onPlayAgain());
   $('btn-menu').addEventListener('click', () => onMenu());
 
@@ -257,5 +336,6 @@ export function createUi(callbacks) {
     showOverlay, hideOverlays,
     renderRound, renderHud, flash,
     setMuteIcon, updateStartScreen, showEndScreen, setVolumes,
+    showSlots, refreshSlots,
   };
 }

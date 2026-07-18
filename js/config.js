@@ -12,6 +12,7 @@ export const DIFF_PROBABILITY = 0.5;
 export const TIME_ATTACK_MS = 60000;
 export const LIVES_COUNT = 10;
 export const FLASH_MS = 200;
+export const SLOT_COUNT = 5;
 
 export const LABELS = {
   title: 'VeCo',
@@ -29,6 +30,13 @@ export const LABELS = {
   shuffle: 'Shuffle',
   lives: '10 Lives',
   livesLabel: 'Lives',
+  save: 'Save',
+  saveGame: 'Save game',
+  loadGame: 'Load game',
+  slot: 'Slot',
+  empty: 'Empty',
+  overwrite: 'Tap again to overwrite',
+  back: 'Back',
   paused: 'Paused',
   tapToResume: 'tap to resume',
   timesUp: "Time's up!",

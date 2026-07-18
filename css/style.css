@@ -337,6 +337,34 @@ header {
 
 .pause-icon { width: 110px; margin-top: 18px; }
 
+#btn-load { margin-top: 14px; }
+
+#slots-list {
+  max-width: 320px;
+  margin: 18px auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.slot-btn {
+  text-align: left;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.85rem;
+}
+.slot-btn:disabled { opacity: 0.4; cursor: default; }
+.slot-btn .slot-title { font-weight: 700; font-size: 0.9rem; }
+.slot-btn .slot-sub { opacity: 0.75; font-variant-numeric: tabular-nums; }
+.slot-btn .slot-date { opacity: 0.5; font-size: 0.75rem; }
+.slot-btn.armed { border-color: #ef4444; }
+.slot-btn.armed .slot-title { color: #ef4444; }
+#btn-slots-back { margin-top: 22px; }
+
 #end-score {
   font-size: 3.2rem;
   font-weight: 700;

@@ -126,5 +126,32 @@ export function createGame({ mode = 'endless', shuffle = false, rng = Math.rando
   function pause() { if (state.phase === 'running') state.phase = 'paused'; }
   function resume() { if (state.phase === 'paused') state.phase = 'running'; }
 
-  return { state, start, answer, advance, pause, resume, startRound };
+  // Serializable mid-run snapshot. Infinity never enters JSON: lives/taRemainingMs
+  // are null unless the mode uses them. The current round is NOT saved — loadState
+  // deals a fresh round at the saved level.
+  function snapshot() {
+    return {
+      mode: state.mode, shuffle: state.shuffle,
+      level: state.level, maxLevel: state.maxLevel,
+      right: state.right, wrong: state.wrong, timeouts: state.timeouts,
+      points: state.points,
+      lives: state.mode === 'lives' ? state.lives : null,
+      taRemainingMs: state.mode === 'ta' ? Math.max(0, Math.round(state.globalRemainingMs)) : null,
+    };
+  }
+
+  function loadState(snap) {
+    state.level = snap.level;
+    state.maxLevel = snap.maxLevel || snap.level;
+    state.right = snap.right || 0;
+    state.wrong = snap.wrong || 0;
+    state.timeouts = snap.timeouts || 0;
+    state.points = snap.points || 0;
+    state.lives = state.mode === 'lives' ? (snap.lives ?? LIVES_COUNT) : Infinity;
+    state.globalRemainingMs = state.mode === 'ta' ? (snap.taRemainingMs ?? TIME_ATTACK_MS) : Infinity;
+    state.phase = 'running';
+    startRound();
+  }
+
+  return { state, start, answer, advance, pause, resume, startRound, snapshot, loadState };
 }
