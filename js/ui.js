@@ -182,6 +182,7 @@ export function createUi(callbacks) {
     onResume();
   });
   $('btn-pause-menu').addEventListener('click', () => onMenu());
+  $('btn-pause-restart').addEventListener('click', () => onPlayAgain());
   $('btn-play-again').addEventListener('click', () => onPlayAgain());
   $('btn-menu').addEventListener('click', () => onMenu());
 
