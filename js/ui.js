@@ -19,12 +19,15 @@ export function createUi(callbacks) {
 
   const els = {
     playfield: $('playfield'),
+    hudStats: $('hud-stats'),
     level: $('hud-level'),
     time: $('hud-time'),
     right: $('hud-right'),
     wrong: $('hud-wrong'),
+    lives: $('hud-lives'),
     points: $('hud-points'),
     best: $('hud-best'),
+    endTitle: $('end-title'),
     roundBarFill: $('round-bar-fill'),
     muteImg: $('img-mute'),
     overlays: {
@@ -110,6 +113,8 @@ export function createUi(callbacks) {
     els.wrong.textContent = state.wrong;
     els.points.textContent = state.points;
     els.best.textContent = best ? best.points : 0;
+    els.hudStats.classList.toggle('show-lives', state.mode === 'lives');
+    if (state.mode === 'lives') els.lives.textContent = state.lives;
     if (state.mode === 'ta') {
       els.time.textContent = (Math.max(0, state.globalRemainingMs) / 1000).toFixed(1);
     } else {
@@ -161,7 +166,8 @@ export function createUi(callbacks) {
       .join('');
   }
 
-  function showEndScreen(points, best, isNewBest, labels) {
+  function showEndScreen(points, best, isNewBest, labels, title) {
+    els.endTitle.textContent = title || labels.timesUp;
     els.endScore.textContent = points;
     els.endBest.textContent = `${labels.best}: ${best.points}`;
     els.endNewBest.classList.toggle('hidden', !isNewBest);

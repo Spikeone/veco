@@ -14,8 +14,9 @@ let pauseShownAt = 0;
 let ui = null;
 
 function scopeLabel(mode, shuffle) {
-  return (mode === 'ta' ? LABELS.timeAttack : LABELS.endless)
-    + (shuffle ? ` · ${LABELS.shuffle}` : '');
+  const modeName = mode === 'ta' ? LABELS.timeAttack
+    : mode === 'lives' ? LABELS.lives : LABELS.endless;
+  return modeName + (shuffle ? ` · ${LABELS.shuffle}` : '');
 }
 
 function refreshStartScreen() {
@@ -58,6 +59,10 @@ function onAnswer(saysSame) {
   ui.flash(res);
   audio.playSfx(res);
   persistProgress();
+  if (game.state.phase === 'over') { // lives ran out on this answer
+    finishGame();
+    return;
+  }
   ui.renderRound(game.state);
   ui.renderHud(game.state, best);
 }
@@ -84,11 +89,12 @@ function onResume() {
   lastFrame = performance.now();
 }
 
-function finishTimeAttack() {
+function finishGame() {
   const st = game.state;
   persistProgress();
   audio.playSfx('gameover');
-  ui.showEndScreen(st.points, best, st.points > startBestPoints, LABELS);
+  const title = st.mode === 'lives' ? LABELS.outOfLives : LABELS.timesUp;
+  ui.showEndScreen(st.points, best, st.points > startBestPoints, LABELS, title);
 }
 
 function onPlayAgain() {
@@ -125,9 +131,13 @@ function step(now) {
     ui.flash('timeout');
     audio.playSfx('timeout');
     persistProgress();
+    if (st.phase === 'over') { // lives ran out on this timeout
+      finishGame();
+      return;
+    }
     ui.renderRound(st);
   } else if (res === 'gameover') {
-    finishTimeAttack();
+    finishGame();
     return;
   }
   ui.renderHud(st, best);

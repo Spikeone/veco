@@ -14,8 +14,10 @@ Screen**. It then runs fullscreen and works offline.
   milliseconds at the moment you answer.
 - **Time Attack** — same rules, but you have 60 seconds total to score as many
   points as possible.
-- **Shuffle** (modifier for both) — the cart may be re-ordered; compare the
-  *content*, not the positions.
+- **10 Lives** — every wrong answer or timeout costs a life; the run ends when
+  all 10 are gone.
+- **Shuffle** (modifier for all modes) — the cart may be re-ordered; compare
+  the *content*, not the positions.
 
 Best scores are kept per mode, lifetime statistics across all of them
 (stored locally on the device).

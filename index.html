@@ -32,6 +32,7 @@
       <div class="stat"><span class="stat-label">Time</span><span class="stat-value" id="hud-time">–</span></div>
       <div class="stat"><span class="stat-label">Right</span><span class="stat-value" id="hud-right">0</span></div>
       <div class="stat"><span class="stat-label">Wrong</span><span class="stat-value" id="hud-wrong">0</span></div>
+      <div class="stat stat-lives"><span class="stat-label">Lives</span><span class="stat-value" id="hud-lives">10</span></div>
       <div class="stat"><span class="stat-label">Points</span><span class="stat-value" id="hud-points">0</span></div>
       <div class="stat"><span class="stat-label">Best</span><span class="stat-value" id="hud-best">0</span></div>
     </div>
@@ -72,6 +73,7 @@
         <div class="segmented">
           <button class="seg-btn selected" data-mode="endless">Endless</button>
           <button class="seg-btn" data-mode="ta">Time Attack</button>
+          <button class="seg-btn" data-mode="lives">10 Lives</button>
         </div>
         <p class="section-label">Option</p>
         <button class="mode-btn shuffle-btn" id="toggle-shuffle" aria-pressed="false">❌ Shuffle</button>
@@ -110,7 +112,7 @@
     <!-- Time attack end -->
     <div class="overlay hidden" id="overlay-end">
       <div class="overlay-card">
-        <h1>Time's up!</h1>
+        <h1 id="end-title">Time's up!</h1>
         <p class="subtitle">Final score</p>
         <p id="end-score">0</p>
         <p id="end-new-best" class="hidden">New best!</p>

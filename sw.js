@@ -1,5 +1,5 @@
 // Precache-everything service worker. Release ritual: bump CACHE, commit, push.
-const CACHE = 'veco-v6';
+const CACHE = 'veco-v7';
 
 const UI_IMAGES = [
   'sound-on', 'sound-off', 'basket', 'cart', 'play-big',
@@ -32,7 +32,11 @@ const ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE)
-      .then((cache) => cache.addAll(ASSETS))
+      // cache:'reload' bypasses the HTTP cache — without it a new SW version can
+      // precache stale copies (e.g. GitHub Pages' max-age=600) into a fresh cache
+      .then((cache) => Promise.all(
+        ASSETS.map((url) => cache.add(new Request(url, { cache: 'reload' }))),
+      ))
       .then(() => self.skipWaiting()),
   );
 });

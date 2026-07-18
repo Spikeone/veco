@@ -1,7 +1,7 @@
 // Pure game logic — no DOM, no timers. The clock is advanced from outside via advance(elapsedMs).
 import {
   ROUND_BASE_MS, MS_PER_LEVEL, MAX_ITEMS,
-  FOOD_MIN, FOOD_MAX, DIFF_PROBABILITY, TIME_ATTACK_MS,
+  FOOD_MIN, FOOD_MAX, DIFF_PROBABILITY, TIME_ATTACK_MS, LIVES_COUNT,
 } from './config.js';
 
 const FOOD_COUNT = FOOD_MAX - FOOD_MIN + 1;
@@ -24,7 +24,20 @@ export function createGame({ mode = 'endless', shuffle = false, rng = Math.rando
     roundBudgetMs: ROUND_BASE_MS,
     roundRemainingMs: ROUND_BASE_MS,
     globalRemainingMs: mode === 'ta' ? TIME_ATTACK_MS : Infinity,
+    lives: mode === 'lives' ? LIVES_COUNT : Infinity,
   };
+
+  // Wrong answers and timeouts both cost a life; at 0 the run is over.
+  function loseLife() {
+    if (state.mode !== 'lives') return false;
+    state.lives--;
+    if (state.lives <= 0) {
+      state.lives = 0;
+      state.phase = 'over';
+      return true;
+    }
+    return false;
+  }
 
   const randomFood = () => FOOD_MIN + Math.floor(rng() * FOOD_COUNT);
 
@@ -66,6 +79,7 @@ export function createGame({ mode = 'endless', shuffle = false, rng = Math.rando
     state.timeouts = 0;
     state.points = 0;
     state.globalRemainingMs = state.mode === 'ta' ? TIME_ATTACK_MS : Infinity;
+    state.lives = state.mode === 'lives' ? LIVES_COUNT : Infinity;
     startRound();
   }
 
@@ -80,6 +94,7 @@ export function createGame({ mode = 'endless', shuffle = false, rng = Math.rando
     } else {
       state.wrong++;
       state.level = Math.max(1, state.level - 1);
+      if (loseLife()) return 'wrong';
     }
     startRound();
     return correct ? 'correct' : 'wrong';
@@ -101,6 +116,7 @@ export function createGame({ mode = 'endless', shuffle = false, rng = Math.rando
     if (state.roundRemainingMs <= 0) {
       state.timeouts++;
       state.level = Math.max(1, state.level - 1);
+      if (loseLife()) return 'timeout'; // caller sees phase 'over'
       startRound();
       return 'timeout';
     }
