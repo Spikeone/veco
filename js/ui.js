@@ -177,9 +177,30 @@ export function createUi(callbacks) {
   $('btn-mute').addEventListener('click', () => onMuteToggle());
 
   $('btn-play').addEventListener('click', () => onPlay(selection.mode, selection.shuffle));
-  els.overlays.pause.addEventListener('click', () => onResume());
+  els.overlays.pause.addEventListener('click', (e) => {
+    if (e.target.closest('.no-resume')) return; // volume sliders / menu button
+    onResume();
+  });
+  $('btn-pause-menu').addEventListener('click', () => onMenu());
   $('btn-play-again').addEventListener('click', () => onPlayAgain());
   $('btn-menu').addEventListener('click', () => onMenu());
+
+  // Volume sliders (start screen + pause overlay share state via data-vol)
+  const volInputs = Array.from(document.querySelectorAll('input[data-vol]'));
+  volInputs.forEach((inp) => {
+    inp.addEventListener('input', () => {
+      const kind = inp.dataset.vol;
+      const value = parseFloat(inp.value);
+      volInputs.forEach((other) => {
+        if (other !== inp && other.dataset.vol === kind) other.value = inp.value;
+      });
+      callbacks.onVolumeChange?.(kind, value);
+    });
+    inp.addEventListener('change', () => callbacks.onVolumeCommit?.(inp.dataset.vol));
+  });
+  function setVolumes(v) {
+    volInputs.forEach((inp) => { inp.value = v[inp.dataset.vol]; });
+  }
   $('btn-credits').addEventListener('click', () => showOverlay('credits'));
   $('btn-credits-close').addEventListener('click', () => showOverlay('start'));
 
@@ -228,6 +249,6 @@ export function createUi(callbacks) {
     selection,
     showOverlay, hideOverlays,
     renderRound, renderHud, flash,
-    setMuteIcon, updateStartScreen, showEndScreen,
+    setMuteIcon, updateStartScreen, showEndScreen, setVolumes,
   };
 }

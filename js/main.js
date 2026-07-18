@@ -96,6 +96,7 @@ function onPlayAgain() {
 }
 
 function onMenu() {
+  saveActiveStats(); // also reached from pause, where nothing else saves playtime
   game = null;
   refreshStartScreen();
   ui.showOverlay('start');
@@ -149,9 +150,12 @@ ui = createUi({
   onPlay, onAnswer, onPauseToggle, onResume,
   onPlayAgain, onMenu, onMuteToggle,
   onSelectionChange: refreshStartScreen,
+  onVolumeChange: (kind, value) => audio.setVolume(kind, value),
+  onVolumeCommit: (kind) => { if (kind === 'sfx') audio.playSfx('correct'); },
 });
 
 ui.setMuteIcon(audio.isMuted());
+ui.setVolumes(audio.getVolumes());
 refreshStartScreen();
 ui.showOverlay('start');
 preloadFoods();
@@ -185,6 +189,6 @@ if (location.hash === '#debug') {
     get game() { return game; },
     get stats() { return stats; },
     set level(n) { if (game) { game.state.level = n; game.startRound(); ui.renderRound(game.state); } },
-    createGame, multisetEqual, storage,
+    createGame, multisetEqual, storage, audio,
   };
 }

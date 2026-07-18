@@ -17,6 +17,10 @@ function set(key, value) {
 export const loadMuted = () => get('muted', false);
 export const saveMuted = (m) => set('muted', !!m);
 
+const DEFAULT_VOLUMES = { music: 0.35, sfx: 0.8 };
+export const loadVolumes = () => ({ ...DEFAULT_VOLUMES, ...get('volume', {}) });
+export const saveVolumes = (v) => set('volume', v);
+
 const bestKey = (mode, shuffle) => `best.${mode}.${shuffle ? 'shuffle' : 'normal'}`;
 
 export const loadBest = (mode, shuffle) => get(bestKey(mode, shuffle), { points: 0, level: 1 });

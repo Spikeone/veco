@@ -1,6 +1,6 @@
 // Web Audio: background music loop + synthesized sound effects.
 // Nothing is created until unlock() runs inside a user gesture (iOS requirement).
-import { loadMuted, saveMuted } from './storage.js';
+import { loadMuted, saveMuted, loadVolumes, saveVolumes } from './storage.js';
 
 let ctx = null;
 let masterGain = null;
@@ -9,6 +9,18 @@ let sfxGain = null;
 let musicSource = null;
 let musicBuffer = null;
 let muted = loadMuted();
+const volumes = loadVolumes();
+
+export const getVolumes = () => ({ ...volumes });
+
+export function setVolume(kind, value) {
+  const key = kind === 'music' ? 'music' : 'sfx';
+  volumes[key] = Math.max(0, Math.min(1, value));
+  saveVolumes(volumes);
+  if (!ctx) return;
+  const gain = key === 'music' ? musicGain : sfxGain;
+  gain.gain.setTargetAtTime(volumes[key], ctx.currentTime, 0.02);
+}
 
 export const isMuted = () => muted;
 
@@ -70,10 +82,10 @@ export function unlock() {
     masterGain.gain.value = muted ? 0 : 1;
     masterGain.connect(ctx.destination);
     musicGain = ctx.createGain();
-    musicGain.gain.value = 0.35;
+    musicGain.gain.value = volumes.music;
     musicGain.connect(masterGain);
     sfxGain = ctx.createGain();
-    sfxGain.gain.value = 0.8;
+    sfxGain.gain.value = volumes.sfx;
     sfxGain.connect(masterGain);
     loadMusic();
   }
